@@ -24,7 +24,7 @@ Web UI：http://127.0.0.1:8000 → **Start Arm** 启动从臂，**Start!** 仅�
 
 ---
 
-## 真机 · 原版（J6↔J6，J7↔J7）
+## 2.0真机（J6↔J6，J7↔J7）
 
 ```bash
 # 双臂
@@ -40,7 +40,7 @@ Leader：`dora-openarm-ker` → `nodes/dora-openarm-ker/src/dora_openarm_ker/mai
 
 ---
 
-## 真机 · J6/J7 交换（KER J6→从臂 J7，KER J7→从臂 J6）
+## 1.0真机（KER J6→从臂 J7，KER J7→从臂 J6）
 
 ```bash
 .venv/bin/dora build dataflow-ker-bimanual-j67-swap.yaml --uv
