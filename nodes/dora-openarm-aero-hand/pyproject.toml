@@ -1,0 +1,24 @@
+[project]
+name = "dora-openarm-aero-hand"
+version = "0.1.0"
+description = "Drive an Aero Hand from the KER right-trigger channel"
+requires-python = ">=3.10"
+dependencies = [
+    "dora-rs >= 0.5.0",
+    "numpy",
+    "pyarrow",
+    "aero-open-sdk",
+]
+
+[project.scripts]
+dora-openarm-aero-hand = "dora_openarm_aero_hand.main:main"
+
+[tool.uv.sources]
+aero-open-sdk = { path = "../../../aero-hand-open/sdk", editable = true }
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

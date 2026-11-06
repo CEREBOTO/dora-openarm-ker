@@ -1,0 +1,19 @@
+[project]
+name = "dora-openarm-sim-follower"
+version = "0.1.0"
+description = "MuJoCo sim follower with dora-openarm-style align and slow start"
+requires-python = ">=3.10"
+dependencies = ["dora-rs >= 0.5.0", "numpy", "pyarrow"]
+
+[project.scripts]
+dora-openarm-sim-follower = "dora_openarm_sim_follower.main:main"
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
