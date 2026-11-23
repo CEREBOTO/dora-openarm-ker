@@ -1,0 +1,20 @@
+[project]
+name = "dora-openarm-chassis"
+version = "0.1.0"
+description = "Quest VR chassis teleop: joystick axes to SocketCAN"
+requires-python = ">=3.10"
+dependencies = ["dora-rs >= 0.5.0", "numpy", "pyarrow"]
+
+[project.scripts]
+dora-openarm-chassis-receiver = "dora_openarm_chassis.receiver:main"
+dora-openarm-chassis-controller = "dora_openarm_chassis.controller:main"
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

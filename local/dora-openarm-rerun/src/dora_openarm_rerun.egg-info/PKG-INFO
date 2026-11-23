@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: dora-openarm-rerun
+Version: 0.1.0
+Summary: Show OpenArm joint positions and camera images in Rerun
+Requires-Python: >=3.10
+Requires-Dist: dora-rs>=0.5.0
+Requires-Dist: numpy
+Requires-Dist: pyarrow
+Requires-Dist: rerun-sdk>=0.20

@@ -1,0 +1,2 @@
+[console_scripts]
+dora-openarm-sim-follower = dora_openarm_sim_follower.main:main

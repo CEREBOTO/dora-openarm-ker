@@ -1,0 +1,2 @@
+[console_scripts]
+dora-openarm-aero-hand = dora_openarm_aero_hand.main:main

@@ -1,0 +1,3 @@
+[console_scripts]
+dora-openarm-chassis-controller = dora_openarm_chassis.controller:main
+dora-openarm-chassis-receiver = dora_openarm_chassis.receiver:main

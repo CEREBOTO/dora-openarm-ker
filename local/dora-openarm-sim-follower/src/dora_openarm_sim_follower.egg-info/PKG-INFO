@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: dora-openarm-sim-follower
+Version: 0.1.0
+Summary: MuJoCo sim follower with dora-openarm-style align and slow start
+Requires-Python: >=3.10
+Requires-Dist: dora-rs>=0.5.0
+Requires-Dist: numpy
+Requires-Dist: pyarrow

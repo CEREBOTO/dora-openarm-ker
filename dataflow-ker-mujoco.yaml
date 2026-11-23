@@ -1,0 +1,73 @@
+# Real KER leader -> sim followers (align + slow start) -> MuJoCo viewer.
+# No cameras, no recorder, no CAN.
+
+nodes:
+  - id: ui
+    build: pip install -e nodes/dora-openarm-data-collection-ui
+    path: dora-openarm-data-collection-ui
+    env:
+      METADATA_FILE: "metadata.yaml"
+    inputs:
+      tick: dora/timer/secs/1
+      arm_status_right:
+        source: sim-follower-right/status
+      arm_status_left:
+        source: sim-follower-left/status
+    outputs:
+      - command
+      - arm_command
+
+  - id: quittable-tick-leader
+    build: pip install -e nodes/dora-openarm-quitter
+    path: dora-openarm-quitter
+    inputs:
+      command: ui/command
+      tick: dora/timer/millis/4
+    outputs:
+      - tick
+
+  - id: leader
+    build: pip install -e nodes/dora-openarm-ker
+    path: dora-openarm-ker
+    inputs:
+      tick: quittable-tick-leader/tick
+    outputs:
+      - follower_position_left
+      - follower_position_right
+      - metadata
+
+  - id: sim-follower-right
+    build: pip install -e local/dora-openarm-sim-follower
+    path: dora-openarm-sim-follower
+    args: "--side right --align-trigger gripper"
+    inputs:
+      move_position: leader/follower_position_right
+      command: ui/arm_command
+      observation: openarm-mujoco/arm_right_observation
+    outputs:
+      - position
+      - status
+
+  - id: sim-follower-left
+    build: pip install -e local/dora-openarm-sim-follower
+    path: dora-openarm-sim-follower
+    args: "--side left --align-trigger gripper"
+    inputs:
+      move_position: leader/follower_position_left
+      command: ui/arm_command
+      observation: openarm-mujoco/arm_left_observation
+    outputs:
+      - position
+      - status
+
+  - id: openarm-mujoco
+    build: pip install -e nodes/dora-openarm-mujoco
+    path: dora-openarm-mujoco
+    args: "--scene cell --keyframe home --viewer --ctrl"
+    inputs:
+      position_right: sim-follower-right/position
+      position_left: sim-follower-left/position
+    outputs:
+      - status
+      - arm_right_observation
+      - arm_left_observation

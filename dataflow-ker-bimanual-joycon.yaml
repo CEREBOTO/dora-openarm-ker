@@ -1,0 +1,107 @@
+# Copyright 2026 Enactic, Inc.
+#
+# KER teleop for both arms, plus one left Joy-Con for the chassis, the lift,
+# and the left gripper. Arm joints still come from the KER.
+
+nodes:
+  - id: ui
+    build: pip install -e nodes/dora-openarm-data-collection-ui
+    path: dora-openarm-data-collection-ui
+    env:
+      METADATA_FILE: "metadata.yaml"
+    inputs:
+      tick: dora/timer/secs/1
+      arm_status_right:
+        source: follower-right/status
+      arm_status_left:
+        source: follower-left/status
+    outputs:
+      - command
+      - arm_command
+
+  - id: quittable-tick-leader
+    build: pip install -e nodes/dora-openarm-quitter
+    path: dora-openarm-quitter
+    inputs:
+      command: ui/command
+      tick: dora/timer/millis/4
+    outputs:
+      - tick
+
+  - id: quittable-tick-aux
+    build: pip install -e nodes/dora-openarm-quitter
+    path: dora-openarm-quitter
+    inputs:
+      command: ui/command
+      tick: dora/timer/millis/20
+    outputs:
+      - tick
+
+  - id: leader
+    build: pip install -e nodes/dora-openarm-ker
+    path: dora-openarm-ker
+    inputs:
+      tick: quittable-tick-leader/tick
+    outputs:
+      - follower_position_left
+      - follower_position_right
+      - metadata
+
+  - id: joycon
+    build: pip install -e local/dora-openarm-joycon
+    path: dora-openarm-joycon
+    inputs:
+      tick: quittable-tick-aux/tick
+      arm_position: leader/follower_position_left
+    outputs:
+      - arm_position
+      - left_stick_y
+      - right_stick_x
+      - button_x
+      - button_y
+
+  - id: follower-right
+    build: pip install -e nodes/dora-openarm
+    path: dora-openarm
+    args: "--side right --align-trigger gripper"
+    inputs:
+      request_state: leader/follower_position_right
+      move_position: leader/follower_position_right
+      command: ui/arm_command
+    outputs:
+      - state
+      - status
+
+  - id: follower-left
+    build: pip install -e nodes/dora-openarm
+    path: dora-openarm
+    args: "--side left --align-trigger gripper --latch-align-trigger"
+    inputs:
+      request_state: joycon/arm_position
+      move_position: joycon/arm_position
+      command: ui/arm_command
+    outputs:
+      - state
+      - status
+
+  - id: chassis-controller
+    build: pip install -e local/dora-openarm-chassis
+    path: dora-openarm-chassis-controller
+    args: "--can-if can2 --max-linear 0.3 --max-angular 25.0 --deadzone 0.05"
+    inputs:
+      tick: quittable-tick-aux/tick
+      left_stick_y: joycon/left_stick_y
+      right_stick_x: joycon/right_stick_x
+    outputs:
+      - status
+
+  - id: lift-controller
+    build: pip install -e local/dora-openarm-lift
+    path: dora-openarm-lift-controller
+    args: "--port /dev/ttyACM0 --baud 115200"
+    inputs:
+      tick: quittable-tick-aux/tick
+      button_x: joycon/button_x
+      button_y: joycon/button_y
+    outputs:
+      - status

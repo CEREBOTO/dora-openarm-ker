@@ -1,0 +1,19 @@
+[project]
+name = "dora-openarm-rerun"
+version = "0.1.0"
+description = "Show OpenArm joint positions and camera images in Rerun"
+requires-python = ">=3.10"
+dependencies = ["dora-rs >= 0.5.0", "numpy", "pyarrow", "rerun-sdk >= 0.20"]
+
+[project.scripts]
+dora-openarm-rerun = "dora_openarm_rerun.main:main"
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

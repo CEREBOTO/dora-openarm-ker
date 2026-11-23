@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: dora-openarm-aero-hand
+Version: 0.1.0
+Summary: Drive an Aero Hand from the KER right-trigger channel
+Requires-Python: >=3.10
+Requires-Dist: dora-rs>=0.5.0
+Requires-Dist: numpy
+Requires-Dist: pyarrow
+Requires-Dist: aero-open-sdk

@@ -1,0 +1,20 @@
+[project]
+name = "dora-openarm-lift"
+version = "0.1.0"
+description = "Quest VR Pico lift teleop: X/Y buttons to USB serial"
+requires-python = ">=3.10"
+dependencies = ["dora-rs >= 0.5.0", "pyarrow", "pyserial>=3.5"]
+
+[project.scripts]
+dora-openarm-lift-receiver = "dora_openarm_lift.receiver:main"
+dora-openarm-lift-controller = "dora_openarm_lift.controller:main"
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

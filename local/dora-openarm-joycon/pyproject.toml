@@ -1,0 +1,20 @@
+[project]
+name = "dora-openarm-joycon"
+version = "0.1.0"
+description = "Left Joy-Con source for chassis, lift, and the left gripper"
+requires-python = ">=3.10"
+dependencies = ["dora-rs >= 0.5.0", "pyarrow"]
+
+[project.scripts]
+dora-openarm-joycon = "dora_openarm_joycon.main:main"
+dora-openarm-joycon-all = "dora_openarm_joycon.main_all:main"
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

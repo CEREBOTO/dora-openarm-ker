@@ -1,0 +1,152 @@
+# Copyright 2026 Enactic, Inc.
+#
+# KER teleop for both arms, with a Rerun window.
+# The window shows the follower's measured joint positions and the
+# wrist and head cameras.
+
+nodes:
+  - id: ui
+    build: pip install -e nodes/dora-openarm-data-collection-ui
+    path: dora-openarm-data-collection-ui
+    env:
+      METADATA_FILE: "metadata.yaml"
+    inputs:
+      tick: dora/timer/secs/1
+      arm_status_right:
+        source: follower-right/status
+      arm_status_left:
+        source: follower-left/status
+    outputs:
+      - command
+      - arm_command
+
+  - id: quittable-tick-leader
+    build: pip install -e nodes/dora-openarm-quitter
+    path: dora-openarm-quitter
+    inputs:
+      command: ui/command
+      tick: dora/timer/millis/4
+    outputs:
+      - tick
+
+  - id: quittable-tick-camera
+    build: pip install -e nodes/dora-openarm-quitter
+    path: dora-openarm-quitter
+    inputs:
+      command: ui/command
+      tick: dora/timer/millis/33
+    outputs:
+      - tick
+
+  - id: leader
+    build: pip install -e nodes/dora-openarm-ker
+    path: dora-openarm-ker
+    inputs:
+      tick: quittable-tick-leader/tick
+    outputs:
+      - follower_position_left
+      - follower_position_right
+      - metadata
+
+  - id: follower-right
+    build: pip install -e nodes/dora-openarm
+    path: dora-openarm
+    args: "--side right --align-trigger gripper"
+    inputs:
+      request_state: leader/follower_position_right
+      move_position: leader/follower_position_right
+      command: ui/arm_command
+    outputs:
+      - state
+      - status
+
+  - id: follower-left
+    build: pip install -e nodes/dora-openarm
+    path: dora-openarm
+    args: "--side left --align-trigger gripper"
+    inputs:
+      request_state: leader/follower_position_left
+      move_position: leader/follower_position_left
+      command: ui/arm_command
+    outputs:
+      - state
+      - status
+
+  - id: camera-wrist-right
+    build: pip install opencv-video-capture
+    path: opencv-video-capture
+    env:
+      CAPTURE_PATH: "/dev/camera_wrist_right"
+      ENCODING: "jpeg"
+      IMAGE_HEIGHT: 600
+      IMAGE_WIDTH: 960
+      JPEG_QUALITY: 90
+    inputs:
+      tick: quittable-tick-camera/tick
+    outputs:
+      - image
+
+  - id: camera-wrist-left
+    build: pip install opencv-video-capture
+    path: opencv-video-capture
+    env:
+      CAPTURE_PATH: "/dev/camera_wrist_left"
+      ENCODING: "jpeg"
+      IMAGE_HEIGHT: 600
+      IMAGE_WIDTH: 960
+      JPEG_QUALITY: 90
+    inputs:
+      tick: quittable-tick-camera/tick
+    outputs:
+      - image
+
+  - id: camera-head-stereo
+    build: pip install opencv-video-capture
+    path: opencv-video-capture
+    env:
+      CAPTURE_PATH: "/dev/camera_head_stereo"
+      ENCODING: "bgr8"
+      IMAGE_HEIGHT: 720
+      IMAGE_WIDTH: 2560
+    inputs:
+      tick: quittable-tick-camera/tick
+    outputs:
+      - image
+
+  - id: camera-head-stereo-splitter
+    build: pip install -e nodes/dora-opencv-image-splitter
+    path: dora-opencv-image-splitter
+    env:
+      SPLIT_MODE: "vertical"
+      NUM_SPLITS: 2
+      JPEG_QUALITY: 90
+      IMAGE_HEIGHT: 720
+      IMAGE_WIDTH: 2560
+    inputs:
+      image: camera-head-stereo/image
+    outputs:
+      - image_0
+      - image_1
+
+  - id: rerun
+    build: pip install -e local/dora-openarm-rerun
+    path: dora-openarm-rerun
+    inputs:
+      observation_right:
+        source: follower-right/state
+        queue_size: 1
+      observation_left:
+        source: follower-left/state
+        queue_size: 1
+      camera_wrist_right:
+        source: camera-wrist-right/image
+        queue_size: 1
+      camera_wrist_left:
+        source: camera-wrist-left/image
+        queue_size: 1
+      camera_head_left:
+        source: camera-head-stereo-splitter/image_0
+        queue_size: 1
+      camera_head_right:
+        source: camera-head-stereo-splitter/image_1
+        queue_size: 1

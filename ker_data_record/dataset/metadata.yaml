@@ -1,0 +1,45 @@
+episodes: []
+equipment:
+  embodiments:
+    arms:
+      id: OpenArm
+      version: '2.0'
+    lifter:
+      home: bottom
+      id: OpenArmCellLifter
+      lead_length: 5.0
+      mechanism: lead_screw
+      stroke: 300
+      unit: mm
+      version: '1.0'
+  id: Test
+  leader:
+    ker:
+      firmware_version: 2.0.0
+      hardware_version: 2.0.0
+      id: OpenArmKER
+  perceptions:
+    cameras:
+      ceiling: {}
+      head_left: {}
+      head_right: {}
+      wrist_left: {}
+      wrist_right: {}
+  version: '1.0'
+frequencies:
+  action:
+    arms:
+      left: 250.0
+      right: 250.0
+  cameras: {}
+  obs:
+    arms:
+      left: 250.0
+      right: 250.0
+location: Lab
+operation_type: teleop
+operator: Tester
+tasks:
+- description: Pick a spoon on a table.
+  prompt: Pick a spoon.
+version: 0.3.0
