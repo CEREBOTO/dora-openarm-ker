@@ -28,26 +28,45 @@ jobs:
       - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
-          python-version: '3.x'
-      - name: Install dora-rs-cli
+          python-version-file: pyproject.toml
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: '0.12.15'
+          enable-cache: true
+      - name: Install system dependencies
         run: |
-          pip install dora-rs-cli
-      - name: Build
+          sudo apt-get update
+          sudo apt-get install -y libcli11-dev
+      - name: Install
         run: |
-          dora build dataflow_dummy.yaml
+          uv sync --locked
+      - name: Up
+        id: up
+        run: |
+          uv run --no-sync dora up
       - name: Run
         run: |
-          dora run dataflow_dummy.yaml &
-          sleep 5
+          LEADER=dummy ROBOT=dummy uv run --no-sync scripts/dora-envsubst start dataflow.yaml --attach &
+          # Wait for the UI node's HTTP server
+          for i in $(seq 1 30); do
+            if curl --silent --output /dev/null http://127.0.0.1:8000/; then
+              break
+            fi
+            sleep 1
+          done
           curl -X POST http://127.0.0.1:8000/start
           sleep 1
           curl -X POST http://127.0.0.1:8000/success
           sleep 3
           curl -X POST http://127.0.0.1:8000/quit
           wait
+      - name: Down
+        if: ${{ always() && steps.up.outcome == 'success' }}
+        run: |
+          uv run --no-sync dora down --force
       - uses: actions/upload-artifact@v7
         with:
           name: dataset
-          path: dataset/
+          path: data/dummy-dummy/
